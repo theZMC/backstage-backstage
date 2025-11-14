@@ -20,6 +20,7 @@ import gfm from 'remark-gfm';
 import { Children, createElement } from 'react';
 import { CodeSnippet } from '../CodeSnippet';
 import { HeadingProps } from 'react-markdown/lib/ast-to-react';
+import rehypeRaw from 'rehype-raw';
 
 export type MarkdownContentClassKey = 'markdown';
 
@@ -108,6 +109,20 @@ const components: Options['components'] = {
   h6: headingRenderer,
 };
 
+// Disallowed in GFM rendering
+// Ref: https://github.github.com/gfm/#disallowed-raw-html-extension-
+const gfmDisallowedElements = [
+  'title',
+  'textarea',
+  'style',
+  'xmp',
+  'iframe',
+  'noembed',
+  'noframes',
+  'script',
+  'plaintext',
+];
+
 /**
  * Renders markdown with the default dialect {@link https://github.github.com/gfm/ | gfm - GitHub flavored Markdown} to backstage theme styled HTML.
  *
@@ -127,8 +142,10 @@ export function MarkdownContent(props: Props) {
   return (
     <ReactMarkdown
       remarkPlugins={dialect === 'gfm' ? [gfm] : []}
+      rehypePlugins={dialect === 'gfm' ? [rehypeRaw] : []}
       className={`${classes.markdown} ${className ?? ''}`.trim()}
       children={content}
+      disallowedElements={dialect === 'gfm' ? gfmDisallowedElements : []}
       components={components}
       linkTarget={linkTarget}
       transformLinkUri={transformLinkUri}
