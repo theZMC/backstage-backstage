@@ -21,6 +21,8 @@ import { Children, createElement } from 'react';
 import { CodeSnippet } from '../CodeSnippet';
 import { HeadingProps } from 'react-markdown/lib/ast-to-react';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import type { PluggableList } from 'react-markdown/lib/react-markdown';
 
 export type MarkdownContentClassKey = 'markdown';
 
@@ -109,18 +111,28 @@ const components: Options['components'] = {
   h6: headingRenderer,
 };
 
-// Disallowed in GFM rendering
-// Ref: https://github.github.com/gfm/#disallowed-raw-html-extension-
-const gfmDisallowedElements = [
-  'title',
-  'textarea',
-  'style',
-  'xmp',
-  'iframe',
-  'noembed',
-  'noframes',
-  'script',
-  'plaintext',
+const gfmRehypePlugins: PluggableList = [
+  [
+    rehypeRaw,
+    {
+      tagFiter: true,
+    },
+  ],
+  [
+    rehypeSanitize,
+    {
+      ...defaultSchema,
+      attributes: {
+        ...defaultSchema.attributes,
+        code: [
+          ...(defaultSchema.attributes?.code ?? []),
+          // for syntax highlighting classes in code blocks
+          // breaks the codesnippet component override above if omitted
+          ['className'],
+        ],
+      },
+    },
+  ],
 ];
 
 /**
@@ -142,10 +154,9 @@ export function MarkdownContent(props: Props) {
   return (
     <ReactMarkdown
       remarkPlugins={dialect === 'gfm' ? [gfm] : []}
-      rehypePlugins={dialect === 'gfm' ? [rehypeRaw] : []}
+      rehypePlugins={dialect === 'gfm' ? gfmRehypePlugins : []}
       className={`${classes.markdown} ${className ?? ''}`.trim()}
       children={content}
-      disallowedElements={dialect === 'gfm' ? gfmDisallowedElements : []}
       components={components}
       linkTarget={linkTarget}
       transformLinkUri={transformLinkUri}

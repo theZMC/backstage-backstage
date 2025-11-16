@@ -51,11 +51,6 @@ const markdownGithubFlavoredWithHTML =
   'This is a paragraph with <strong>bold text</strong> and <em>italic text</em>.\n' +
   '\n' +
   '<br />\n' +
-  '<div style="color: blue; border: 1px solid black; padding: 10px;">\n' +
-  '  This is a custom HTML block with inline styles.\n' +
-  '</div>\n' +
-  '\n' +
-  '<br>\n' +
   '\n' +
   'Here is a list:\n' +
   '\n' +

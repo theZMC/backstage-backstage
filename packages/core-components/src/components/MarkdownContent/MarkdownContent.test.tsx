@@ -182,6 +182,23 @@ describe('<MarkdownContent />', () => {
     expect(line3.previousSibling?.nodeName).toBe('BR');
   });
 
+  it('render MarkdownContent component without allowing inline styles in GFM dialect', async () => {
+    await renderInTestApp(
+      <MarkdownContent
+        content='<div style="color: blue; border: 1px solid black; padding: 10px;">This is a custom HTML block with inline styles.</div>'
+        dialect="gfm"
+      />,
+    );
+
+    const divElement = screen.getByText(
+      'This is a custom HTML block with inline styles.',
+    );
+    expect(divElement).toBeInTheDocument();
+    expect(divElement).not.toHaveStyle('color: blue');
+    expect(divElement).not.toHaveStyle('border: 1px solid black');
+    expect(divElement).not.toHaveStyle('padding: 10px');
+  });
+
   it('render MarkdownContent component without disallowed elements in GFM dialect', async () => {
     const { container } = await renderInTestApp(
       <MarkdownContent
